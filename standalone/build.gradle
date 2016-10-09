@@ -1,0 +1,49 @@
+apply plugin: 'application'
+mainClassName = 'pl.pietro.standalone.FilterBuilder'
+
+sourceSets {
+	behaveTest {
+		java {
+			srcDir "src/test-behave/java"
+		}
+		resources {
+			srcDir "src/test-behave/resources"
+		}		
+		
+		compileClasspath += sourceSets.main.runtimeClasspath
+		compileClasspath += sourceSets.test.compileClasspath
+	}
+}
+
+configurations {
+	behaveTestCompile.extendsFrom testCompile
+	behaveTestRuntime.extendsFrom testRuntime
+}
+
+task behaveTest(type: Test) {
+	testClassesDir = sourceSets.behaveTest.output.classesDir 
+	classpath = sourceSets.behaveTest.runtimeClasspath
+	
+	include '**/*Runner*'
+	
+	doFirst {
+		file('target').mkdirs();
+	}
+}
+
+defaultTasks 'clean', 'test', 'behaveTest', 'build'
+check.dependsOn behaveTest
+
+dependencies {
+	behaveTestCompile 'org.jbehave:jbehave-core:4.0.4'
+	behaveTestCompile 'de.codecentric:jbehave-junit-runner:1.2.0'			
+	
+	behaveTestCompile sourceSets.main.output
+	behaveTestCompile configurations.testCompile
+	behaveTestCompile sourceSets.test.output
+	behaveTestRuntime configurations.testRuntime
+	
+	compile 'junit:junit:4.12'
+	compile 'org.jbehave:jbehave-core:4.0.4'
+	compile 'de.codecentric:jbehave-junit-runner:1.2.0'
+}

@@ -1,0 +1,76 @@
+sourceSets {
+	behaveTest {
+		java {
+			srcDir 'src/test-behave/java'
+		}		
+		resources {
+			srcDir 'src/test-behave/resources'
+		}		
+		compileClasspath += sourceSets.main.runtimeClasspath
+		compileClasspath += sourceSets.test.compileClasspath
+	}	
+	performanceTest {
+		java {
+			srcDir 'src/test-performance/java'
+		}
+		resources {
+			srcDir 'src/test-performance/resources'
+		}
+		compileClasspath += sourceSets.main.runtimeClasspath
+		compileClasspath += sourceSets.test.runtimeClasspath
+		compileClasspath += sourceSets.test.compileClasspath
+	}
+}
+
+configurations {
+	behaveTestCompile.extendsFrom testCompile
+	behaveTestRuntime.extendsFrom testRuntime
+}
+
+task behaveTest(type: Test) {
+	testClassesDir = sourceSets.behaveTest.output.classesDir 
+	classpath = sourceSets.behaveTest.runtimeClasspath
+	
+	include '**/*Runner*'
+	
+	doFirst {
+		file('target').mkdirs();
+	}
+}
+
+task performanceTest(type: Test) {
+	testClassesDir = sourceSets.performanceTest.output.classesDir
+	classpath = sourceSets.performanceTest.runtimeClasspath
+	classpath += sourceSets.test.runtimeClasspath
+}
+
+defaultTasks 'clean', 'test', 'behaveTest', 'performanceTest', 'build'
+check.dependsOn behaveTest, performanceTest
+
+dependencies {
+	
+	behaveTestCompile 'org.jbehave:jbehave-core:4.0.4'
+	behaveTestCompile 'de.codecentric:jbehave-junit-runner:1.2.0'			
+	
+	behaveTestCompile sourceSets.main.output
+	behaveTestCompile configurations.testCompile
+	behaveTestCompile sourceSets.test.output
+	behaveTestRuntime configurations.testRuntime	
+	
+	compile 'org.apache.commons:commons-lang3:3.4'
+	compile 'junit:junit:4.12'
+	compile 'org.slf4j:slf4j-api:1.7.12'
+	compile 'org.slf4j:slf4j-simple:1.7.12'	
+	compile 'org.springframework:spring-core:4.2.1.RELEASE'
+	compile 'org.springframework:spring-context:4.2.1.RELEASE'
+	compile 'org.springframework:spring-test:4.2.1.RELEASE'
+	compile 'de.codecentric:jbehave-junit-runner:1.2.0'
+	compile 'org.jbehave:jbehave-core:4.0.4'
+	compile 'de.codecentric:jbehave-junit-runner:1.2.0'
+	compile 'org.jbehave:jbehave-spring:4.0.4'
+	compile 'org.jsoup:jsoup:1.8.3'
+	compile 'com.google.guava:guava:19.0-rc2'
+	compile 'com.google.guava:guava-base:r03' 	
+	testCompile 'com.carrotsearch:junit-benchmarks:0.7.2'
+	 	
+}
